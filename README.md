@@ -5,14 +5,8 @@ Go-key is inspired by Redis and is written in Go and C. The C version is called 
 Key features:
 
 - Communication via TCP
-- Accepts GET, SET, DEL, EXPIRE commands
+- Accepts GET, SET commands
 - Uses LRU cache-eviction policy
 - Only string data is supported in version 1.0
 - Reads from disk if the requested data is not found in the memory
 - Write logs stored on disk
-
-Project structure:
-
-- main.go is the entry point
-- server directory contains all the server-side logic functions
-- client directory for client-side logic functions
