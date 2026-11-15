@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestEviction(t *testing.T) {
@@ -51,5 +52,41 @@ func TestDeletion(t *testing.T) {
 
 	if ok := shards.DelKey(key); ok {
 		t.Error("DelKey should have returned false")
+	}
+}
+
+func TestExpiration(t *testing.T) {
+	// could use smaller test times
+	shards := InitShards()
+
+	key := "key1"
+
+	t.Log("Testing to check whether GetKey detects expired keys...")
+
+	shards.SetKey(key, "v")
+
+	if !shards.ExpireKey(key, 5) {
+		t.Fatal("ExpireKey should have found the key")
+	}
+
+	if _, ok := shards.GetKey(key); !ok {
+		t.Error("GetKey should have returned true")
+	}
+
+	time.Sleep(time.Duration(6) * time.Second)
+
+	if _, ok := shards.GetKey(key); ok {
+		t.Error("GetKey should have returned false")
+	}
+
+	t.Log("Testing to check whether ExpireKey detects expired keys...")
+
+	shards.SetKey(key, "v")
+	shards.ExpireKey(key, 3)
+
+	time.Sleep(time.Duration(4) * time.Second)
+
+	if ok := shards.ExpireKey(key, 5); ok {
+		t.Error("ExpireKey should have returned false")
 	}
 }

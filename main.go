@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"hash/fnv"
 	"sync"
+	"time"
 )
 
 const SHARDS uint32 = 16
@@ -11,6 +11,7 @@ const MAX_CACHE_SIZE int = 30
 
 type Node struct {
 	key, value string
+	expiresAt  int64
 	prev, next *Node
 }
 
@@ -89,7 +90,7 @@ func (shards *Shards) SetKey(key string, value string) {
 		sh.updateMRU(node)
 
 		if sh.size > MAX_CACHE_SIZE {
-			sh.size = MAX_CACHE_SIZE
+			sh.size -= 1
 			old := sh.lru
 			sh.unlink(old)
 			delete(sh.store, old.key)
@@ -97,6 +98,7 @@ func (shards *Shards) SetKey(key string, value string) {
 
 	} else {
 		node.value = value
+		node.expiresAt = 0
 		sh.unlink(node)
 		sh.updateMRU(node)
 	}
@@ -111,6 +113,14 @@ func (shards *Shards) GetKey(key string) (string, bool) {
 	node, ok := sh.store[key]
 
 	if ok {
+		if node.expiresAt != 0 && time.Now().UnixMilli() > node.expiresAt {
+			sh.unlink(node)
+			delete(sh.store, key)
+			sh.size -= 1
+
+			return "", false
+		}
+
 		sh.unlink(node)
 		sh.updateMRU(node)
 
@@ -139,6 +149,28 @@ func (shards *Shards) DelKey(key string) bool {
 	return true
 }
 
+func (shards *Shards) ExpireKey(key string, seconds uint) bool {
+	sh := &shards.storeArr[FindShard(key)]
+
+	sh.mx.Lock()
+	defer sh.mx.Unlock()
+
+	node, ok := sh.store[key]
+	now := time.Now().UnixMilli()
+
+	if ok {
+		if node.expiresAt != 0 && now > node.expiresAt {
+			return false
+		}
+
+		node.expiresAt = now + int64(seconds)*1000
+	} else {
+		return false
+	}
+
+	return true
+}
+
 func FindShard(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
@@ -146,7 +178,5 @@ func FindShard(s string) uint32 {
 }
 
 func main() {
-	shards := InitShards()
-	shards.SetKey("theme", "light")
-	fmt.Println(shards.GetKey("theme"))
+	// dev tests here
 }
