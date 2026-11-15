@@ -120,6 +120,25 @@ func (shards *Shards) GetKey(key string) (string, bool) {
 	return "", ok
 }
 
+func (shards *Shards) DelKey(key string) bool {
+	sh := &shards.storeArr[FindShard(key)]
+
+	sh.mx.Lock()
+	defer sh.mx.Unlock()
+
+	node, ok := sh.store[key]
+
+	if ok {
+		sh.unlink(node)
+		delete(sh.store, key)
+		sh.size -= 1
+	} else {
+		return false
+	}
+
+	return true
+}
+
 func FindShard(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))

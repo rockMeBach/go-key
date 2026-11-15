@@ -31,3 +31,25 @@ func TestEviction(t *testing.T) {
 		}
 	}
 }
+
+func TestDeletion(t *testing.T) {
+	shards := InitShards()
+
+	key := "key1"
+
+	shards.SetKey(key, "v")
+
+	if _, ok := shards.GetKey(key); !ok {
+		t.Error("key was expected to be set")
+	}
+
+	shards.DelKey(key)
+
+	if _, ok := shards.GetKey(key); ok {
+		t.Error("key was expected to be deleted")
+	}
+
+	if ok := shards.DelKey(key); ok {
+		t.Error("DelKey should have returned false")
+	}
+}
