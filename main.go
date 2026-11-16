@@ -177,17 +177,43 @@ func FindShard(s string) uint32 {
 	return h.Sum32() % SHARDS
 }
 
-func (safeStore *SafeStore) sweepStore() {
-	safeStore.mx.Lock()
-	defer safeStore.mx.Unlock()
+func (safeStore *SafeStore) sweepStore(passCap int, batchSize int) {
+	// Redis-like sampling
+	for range passCap {
+		safeStore.mx.Lock()
 
-	now := time.Now().UnixMilli()
+		count := 0
+		totalWithTTL := 0
+		totalExpired := 0
+		now := time.Now().UnixMilli()
 
-	for key, node := range safeStore.store {
-		if node.expiresAt != 0 && now > node.expiresAt {
-			safeStore.size -= 1
-			safeStore.unlink(node)
-			delete(safeStore.store, key)
+		for key, node := range safeStore.store {
+			if node.expiresAt != 0 {
+				totalWithTTL += 1
+
+				if now > node.expiresAt {
+					totalExpired += 1
+					safeStore.unlink(node)
+					safeStore.size -= 1
+					delete(safeStore.store, key)
+				}
+			}
+
+			count += 1
+
+			if count == batchSize {
+				break
+			}
+		}
+
+		safeStore.mx.Unlock()
+
+		if totalWithTTL == 0 {
+			return
+		}
+
+		if float64(totalExpired)/float64(totalWithTTL) <= 0.25 {
+			return
 		}
 	}
 }
@@ -205,7 +231,7 @@ func (shards *Shards) startSweeper(interval time.Duration) (stop func()) {
 				return
 			case <-ticker.C:
 				for i := range shards.storeArr {
-					shards.storeArr[i].sweepStore()
+					shards.storeArr[i].sweepStore(10, 20)
 				}
 			}
 		}
