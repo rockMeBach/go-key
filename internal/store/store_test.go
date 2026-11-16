@@ -93,7 +93,7 @@ func TestExpiration(t *testing.T) {
 
 func TestSweeper(t *testing.T) {
 	shards := InitShards()
-	stop := shards.startSweeper(100 * time.Millisecond)
+	stop := shards.StartSweeper(100 * time.Millisecond)
 	defer stop()
 
 	key := "key1"

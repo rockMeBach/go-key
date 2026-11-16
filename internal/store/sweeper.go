@@ -43,7 +43,7 @@ func (safeStore *SafeStore) sweepStore(passCap int, batchSize int) {
 	}
 }
 
-func (shards *Shards) startSweeper(interval time.Duration) (stop func()) {
+func (shards *Shards) StartSweeper(interval time.Duration) (stop func()) {
 	done := make(chan struct{})
 
 	go func() {
