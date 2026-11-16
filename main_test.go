@@ -90,3 +90,29 @@ func TestExpiration(t *testing.T) {
 		t.Error("ExpireKey should have returned false")
 	}
 }
+
+func TestSweeper(t *testing.T) {
+	shards := InitShards()
+	stop := shards.startSweeper(100 * time.Millisecond)
+	defer stop()
+
+	key := "key1"
+	shards.SetKey(key, "v")
+	if !shards.ExpireKey(key, 1) {
+		t.Fatal("ExpireKey should have found the key")
+	}
+
+	time.Sleep(1500 * time.Millisecond)
+
+	// inspect the map directly, NOT through GetKey
+	sh := &shards.storeArr[FindShard(key)]
+	sh.mx.Lock()
+	defer sh.mx.Unlock()
+
+	if _, exists := sh.store[key]; exists {
+		t.Error("sweeper should have removed the expired key from the map")
+	}
+	if sh.size != 0 {
+		t.Errorf("size should be 0, got %d", sh.size)
+	}
+}

@@ -177,6 +177,43 @@ func FindShard(s string) uint32 {
 	return h.Sum32() % SHARDS
 }
 
+func (safeStore *SafeStore) sweepStore() {
+	safeStore.mx.Lock()
+	defer safeStore.mx.Unlock()
+
+	now := time.Now().UnixMilli()
+
+	for key, node := range safeStore.store {
+		if node.expiresAt != 0 && now > node.expiresAt {
+			safeStore.size -= 1
+			safeStore.unlink(node)
+			delete(safeStore.store, key)
+		}
+	}
+}
+
+func (shards *Shards) startSweeper(interval time.Duration) (stop func()) {
+	done := make(chan struct{})
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				for i := range shards.storeArr {
+					shards.storeArr[i].sweepStore()
+				}
+			}
+		}
+	}()
+
+	return func() { close(done) }
+}
+
 func main() {
-	// dev tests here
+
 }
