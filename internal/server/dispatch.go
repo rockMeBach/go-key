@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/rockMeBach/gokey/internal/store"
 )
@@ -12,7 +13,7 @@ func dispatch(parts []string, shards *store.Shards) (string, string, error) {
 		return "", "", errors.New("empty parts")
 	}
 
-	command := parts[0]
+	command := strings.ToUpper(parts[0])
 	miss_arg_err := errors.New("missing arguments")
 
 	switch command {
