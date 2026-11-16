@@ -18,7 +18,7 @@ func dispatch(parts []string, shards *store.Shards) (string, string, error) {
 
 	switch command {
 	case "SET":
-		if len(parts) < 3 {
+		if len(parts) != 3 {
 			return "", "", miss_arg_err
 		}
 
@@ -27,7 +27,7 @@ func dispatch(parts []string, shards *store.Shards) (string, string, error) {
 		shards.SetKey(key, value)
 		return "key set", "", nil
 	case "GET":
-		if len(parts) < 2 {
+		if len(parts) != 2 {
 			return "", "", miss_arg_err
 		}
 
@@ -41,7 +41,7 @@ func dispatch(parts []string, shards *store.Shards) (string, string, error) {
 
 		return "key retrieved", val, nil
 	case "DEL":
-		if len(parts) < 2 {
+		if len(parts) != 2 {
 			return "", "", miss_arg_err
 		}
 
@@ -53,7 +53,7 @@ func dispatch(parts []string, shards *store.Shards) (string, string, error) {
 
 		return "", "", errors.New("key not found")
 	case "EXPIRE":
-		if len(parts) < 3 {
+		if len(parts) != 3 {
 			return "", "", miss_arg_err
 		}
 
