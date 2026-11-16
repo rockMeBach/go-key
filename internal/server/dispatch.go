@@ -1,77 +1,61 @@
 package server
 
 import (
-	"errors"
 	"strconv"
 	"strings"
 
+	"github.com/rockMeBach/gokey/internal/resp"
 	"github.com/rockMeBach/gokey/internal/store"
 )
 
-func dispatch(parts []string, shards *store.Shards) (string, string, error) {
+func dispatch(parts []string, shards *store.Shards) []byte {
 	if len(parts) == 0 {
-		return "", "", errors.New("empty parts")
+		return resp.Error("empty command")
 	}
 
 	command := strings.ToUpper(parts[0])
-	miss_arg_err := errors.New("missing arguments")
+	argErr := resp.Error("wrong number of arguments for '" + strings.ToLower(command) + "' command")
 
 	switch command {
 	case "SET":
 		if len(parts) != 3 {
-			return "", "", miss_arg_err
+			return argErr
 		}
+		shards.SetKey(parts[1], parts[2])
+		return resp.SimpleString("OK")
 
-		key := parts[1]
-		value := parts[2]
-		shards.SetKey(key, value)
-		return "key set", "", nil
 	case "GET":
 		if len(parts) != 2 {
-			return "", "", miss_arg_err
+			return argErr
 		}
-
-		key := parts[1]
-
-		val, ok := shards.GetKey(key)
-
+		val, ok := shards.GetKey(parts[1])
 		if !ok {
-			return "", "", errors.New("key not found")
+			return resp.Null()
 		}
+		return resp.BulkString(val)
 
-		return "key retrieved", val, nil
 	case "DEL":
 		if len(parts) != 2 {
-			return "", "", miss_arg_err
+			return argErr
 		}
-
-		key := parts[1]
-
-		if shards.DelKey(key) {
-			return "key deleted", "", nil
+		if shards.DelKey(parts[1]) {
+			return resp.Integer(1)
 		}
+		return resp.Integer(0)
 
-		return "", "", errors.New("key not found")
 	case "EXPIRE":
 		if len(parts) != 3 {
-			return "", "", miss_arg_err
+			return argErr
 		}
-
-		key := parts[1]
-		seconds := parts[2]
-
-		seconds_int, err := strconv.Atoi(seconds)
-
-		if err != nil {
-			return "", "", errors.New("error setting expiry")
+		seconds, err := strconv.Atoi(parts[2])
+		if err != nil || seconds < 0 {
+			return resp.Error("value is not an integer or out of range")
 		}
-
-		if shards.ExpireKey(key, seconds_int) {
-			return "expiry set", "", nil
+		if shards.ExpireKey(parts[1], seconds) {
+			return resp.Integer(1)
 		}
-
-		return "", "", errors.New("key has expired")
+		return resp.Integer(0)
 	}
 
-	return "", "", errors.New("unknown command")
+	return resp.Error("unknown command '" + parts[0] + "'")
 }

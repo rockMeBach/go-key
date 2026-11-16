@@ -11,6 +11,14 @@ import (
 
 const MAX_BULK int = 1000
 
+func SimpleString(s string) []byte { return []byte("+" + s + "\r\n") }
+func Error(msg string) []byte      { return []byte("-ERR " + msg + "\r\n") }
+func Integer(n int) []byte         { return []byte(":" + strconv.Itoa(n) + "\r\n") }
+func Null() []byte                 { return []byte("$-1\r\n") }
+func BulkString(s string) []byte {
+	return []byte("$" + strconv.Itoa(len(s)) + "\r\n" + s + "\r\n")
+}
+
 func EncodeRESP(command []string) []byte {
 	var buffer bytes.Buffer
 

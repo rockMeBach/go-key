@@ -43,13 +43,7 @@ func handleConnection(conn net.Conn, shards *store.Shards) {
 			return
 		}
 
-		_, val, err := dispatch(parts, shards)
-
-		if err != nil {
-			conn.Write([]byte(err.Error()))
-			return
-		}
-
-		conn.Write([]byte(val))
+		reply := dispatch(parts, shards)
+		conn.Write(reply)
 	}
 }
