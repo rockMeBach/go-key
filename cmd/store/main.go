@@ -1,13 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"time"
 
-	store "github.com/rockMeBach/gokey/internal/store"
+	"github.com/rockMeBach/gokey/internal/server"
+	"github.com/rockMeBach/gokey/internal/store"
 )
 
 func main() {
 	shards := store.InitShards()
-	shards.SetKey("testkey", "v")
-	fmt.Println(shards.GetKey("testkey"))
+
+	stopSweeper := shards.StartSweeper(time.Second)
+	defer stopSweeper()
+
+	server.SetupTCP(":8080", shards)
 }

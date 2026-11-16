@@ -82,7 +82,7 @@ func (shards *Shards) DelKey(key string) bool {
 	return true
 }
 
-func (shards *Shards) ExpireKey(key string, seconds uint) bool {
+func (shards *Shards) ExpireKey(key string, seconds int) bool {
 	sh := &shards.storeArr[FindShard(key)]
 
 	sh.mx.Lock()
