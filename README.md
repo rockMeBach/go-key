@@ -10,3 +10,8 @@ Key features:
 - Only string data is supported in version 1.0
 - Reads from disk if the requested data is not found in the memory
 - Write logs stored on disk
+
+Communication via a client:
+
+- You can send commands via redis-cli
+- Use valkey-cli if you're running Arch
