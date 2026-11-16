@@ -1,1 +1,8 @@
-create an array of 16 hashmaps
+design the format of messages to be sent to the tcp server
+to interact with the cache application
+
+COMMAND:key:value
+
+use RESP formatter (client) and parser (server)
+
+client, server and proxy - 3 elements in one repo
