@@ -20,6 +20,11 @@ Features to be added:
 
 Command-line clients:
 
-- Has its own client which can be run using cmd/cli/main.go
+- Has its own client
 - You can also send commands via redis-cli
 - Use valkey-cli if you're using it on Arch
+
+How to run:
+
+- Start the server using ```go run cmd/store/main.go```
+- Start the client using ```go run cmd/cli/main.go```
