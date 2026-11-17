@@ -4,14 +4,19 @@ Go-key is inspired by Redis and is written in Go and C. The C version is called 
 
 Key features:
 
-- Communication via TCP
 - Accepts GET, SET, DEL, EXPIRE commands
+- Bi-directional communication using TCP
 - Uses LRU cache-eviction policy
-- Only string data is supported in version 1.0
-- Reads from disk if the requested data is not found in the memory
-- Write logs stored on disk
+- Only string data is supported as of now
 
-Communication via a client:
+Features to be added:
 
-- You can send commands via redis-cli
-- Use valkey-cli if you're running Arch
+- Data persistence
+- Read from disk if the requested data is not found in the store
+- Store write logs on disk
+
+Clients:
+
+- Has its own client
+- You can also send commands via redis-cli
+- Use valkey-cli if you're using it on Arch
