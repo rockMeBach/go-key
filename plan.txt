@@ -1,8 +1,8 @@
-design the format of messages to be sent to the tcp server
-to interact with the cache application
+now starting to build the client
 
-COMMAND:key:value
+features of the client:
 
-use RESP formatter (client) and parser (server)
-
-client, server and proxy - 3 elements in one repo
+- interactive, takes a COMMAND
+- serializes using resp
+- sends to the server via tcp
+- receives response from the server and parses it
