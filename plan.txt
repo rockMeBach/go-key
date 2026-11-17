@@ -1,8 +1,0 @@
-now starting to build the client
-
-features of the client:
-
-- interactive, takes a COMMAND
-- serializes using resp
-- sends to the server via tcp
-- receives response from the server and parses it
