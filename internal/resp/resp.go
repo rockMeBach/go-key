@@ -93,3 +93,56 @@ func DecodeRESP(reader *bufio.Reader) ([]string, error) {
 
 	return parts, nil
 }
+
+func DecodeRESPClient(reader *bufio.Reader) (string, error) {
+	peek, err := reader.Peek(1)
+
+	if err != nil {
+		return "", err
+	}
+
+	line, err := reader.ReadString('\n')
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(peek) == 0 || len(line) == 0 {
+		return "", errors.New("empty peek or line")
+	}
+
+	str := strings.TrimSuffix(line[1:], "\r\n")
+
+	switch peek[0] {
+	case '+':
+		return str, nil
+	case '-':
+		return str, nil
+	case ':':
+		return str, nil
+	case '$':
+		if str == "-1" {
+			return "nil", nil
+		}
+
+		N, err := strconv.Atoi(str)
+
+		if err != nil {
+			return "", errors.New("error reading length")
+		}
+
+		buf := make([]byte, N+2)
+
+		if _, err := io.ReadFull(reader, buf); err != nil {
+			return "", err
+		}
+
+		if buf[N] != '\r' || buf[N+1] != '\n' {
+			return "", errors.New("missing CRLF after bulk string")
+		}
+
+		return strings.TrimSuffix(string(buf), "\r\n"), nil
+	}
+
+	return "", nil
+}
