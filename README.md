@@ -12,7 +12,7 @@ Key features and functions:
 - Uses redis-like sampling technique to delete expired keys in the active sweeper
 - Encodes and decodes commands and messages using RESP (Redis Serialization Protocol)
 - Proxy that uses consistent-hashing so to store big data
-- Currently, the proxy lazily opens connections to each store server per client connection
+- Currently, the proxy lazily opens connections to each store server per client connection, it stores a connection in a map to reuse the connection instead of creating a new one
 
 Features to be added:
 
@@ -28,5 +28,6 @@ Command-line clients:
 
 How to run:
 
+- Start the proxy using ```go run cmd/proxy/main.go```
 - Start the server using ```go run cmd/store/main.go```
 - Start the client using ```go run cmd/cli/main.go```
