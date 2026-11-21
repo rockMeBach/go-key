@@ -146,3 +146,31 @@ func DecodeRESPClient(reader *bufio.Reader) (string, error) {
 
 	return "", nil
 }
+
+func ReadRawReply(reader *bufio.Reader) ([]byte, error) {
+	line, err := reader.ReadBytes('\n')
+	if err != nil {
+		return nil, err
+	}
+
+	switch line[0] {
+	case '+', '-', ':':
+		return line, nil
+	case '$':
+		L, err := strconv.Atoi(strings.TrimSuffix(string(line[1:]), "\r\n"))
+		if err != nil {
+			return nil, errors.New("invalid bulk length")
+		}
+		if L == -1 {
+			return line, nil // null reply
+		}
+
+		buf := make([]byte, L+2) // data + \r\n
+		if _, err := io.ReadFull(reader, buf); err != nil {
+			return nil, err
+		}
+		return append(line, buf...), nil
+	}
+
+	return nil, errors.New("unexpected reply type")
+}
