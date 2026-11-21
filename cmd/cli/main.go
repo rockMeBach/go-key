@@ -41,9 +41,16 @@ func main() {
 			continue
 		}
 
+		if len(parts) == 1 && parts[0] == "exit" {
+			fmt.Println("quitting")
+			return
+		}
+
 		conn.Write(resp.EncodeRESP(parts))
 
 		msg, err := resp.DecodeRESPClient(reader)
+
+		// show the output on the cmd line
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		} else {

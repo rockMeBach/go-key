@@ -79,6 +79,7 @@ func handleConnection(conn net.Conn, ring *hashring.HashRing) {
 		}
 
 		reply, err := forward(b, parts)
+
 		if err != nil {
 			b.conn.Close()
 			delete(backends, ip)
