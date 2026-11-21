@@ -9,22 +9,27 @@ import (
 	"sync"
 )
 
+type Server struct {
+	name string
+	ip   string
+}
+
 type HashRing struct {
 	mx             sync.RWMutex
-	ring           map[uint32]string
+	ring           map[uint32]Server
 	serverReplicas int
 	sortedNodes    []uint32
 }
 
 func InitHashring(serverReplicas int) *HashRing {
 	return &HashRing{
-		ring:           make(map[uint32]string),
+		ring:           make(map[uint32]Server),
 		serverReplicas: serverReplicas,
 		sortedNodes:    make([]uint32, 0),
 	}
 }
 
-func (ring *HashRing) AddServer(serverName string) error {
+func (ring *HashRing) AddServer(serverName string, serverIP string) error {
 	ring.mx.Lock()
 	defer ring.mx.Unlock()
 
@@ -38,7 +43,10 @@ func (ring *HashRing) AddServer(serverName string) error {
 			return errors.New("Server with this name already exists")
 		}
 
-		ring.ring[hash] = serverReplica
+		ring.ring[hash] = Server{
+			name: serverReplica,
+			ip:   serverIP,
+		}
 		ring.sortedNodes = append(ring.sortedNodes, hash)
 	}
 
@@ -69,12 +77,12 @@ func (ring *HashRing) RemoveServer(serverName string) error {
 	return nil
 }
 
-func (ring *HashRing) FindKeyServer(key string) (string, error) {
+func (ring *HashRing) FindKeyServer(key string) (Server, error) {
 	ring.mx.RLock()
 	defer ring.mx.RUnlock()
 
 	if len(ring.sortedNodes) == 0 {
-		return "", errors.New("The ring is empty")
+		return Server{}, errors.New("The ring is empty")
 	}
 
 	hash := generateHash(key)
