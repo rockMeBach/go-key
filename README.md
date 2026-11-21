@@ -11,6 +11,8 @@ Key features and functions:
 - Deletes expired keys using an active sweeper + passively whenever GET command is run
 - Uses redis-like sampling technique to delete expired keys in the active sweeper
 - Encodes and decodes commands and messages using RESP (Redis Serialization Protocol)
+- Proxy that uses consistent-hashing so to store big data
+- Currently, the proxy lazily opens connections to each store server per client connection
 
 Features to be added:
 
