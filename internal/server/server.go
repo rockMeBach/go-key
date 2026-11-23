@@ -10,8 +10,8 @@ import (
 	"github.com/rockMeBach/gokey/internal/store"
 )
 
-func SetupTCP(port string, shards *store.Shards) {
-	listener, err := net.Listen("tcp", port)
+func SetupTCP(address string, shards *store.Shards) {
+	listener, err := net.Listen("tcp", address)
 
 	if err != nil {
 		log.Fatal("Error listening:", err)
@@ -19,7 +19,7 @@ func SetupTCP(port string, shards *store.Shards) {
 
 	defer listener.Close()
 
-	fmt.Println("Now accepting connections on port", port)
+	fmt.Println("Now accepting connections on", address)
 
 	for {
 		conn, err := listener.Accept()

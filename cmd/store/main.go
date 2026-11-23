@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"os"
 	"time"
 
 	"github.com/rockMeBach/gokey/internal/server"
@@ -13,5 +15,12 @@ func main() {
 	stopSweeper := shards.StartSweeper(time.Second)
 	defer stopSweeper()
 
-	server.SetupTCP(":8080", shards)
+	PORT, err := os.LookupEnv("GOKEY_STORE_PORT")
+
+	if !err {
+		log.Fatal("GOKEY_STORE_PORT variable not set")
+		return
+	}
+
+	server.SetupTCP(PORT, shards)
 }

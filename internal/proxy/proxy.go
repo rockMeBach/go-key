@@ -15,8 +15,8 @@ type backend struct {
 	reader *bufio.Reader
 }
 
-func SetupProxyTCP(port string, ring *hashring.HashRing) {
-	listener, err := net.Listen("tcp", port)
+func SetupProxyTCP(address string, ring *hashring.HashRing) {
+	listener, err := net.Listen("tcp", address)
 
 	if err != nil {
 		log.Fatal("Error listening:", err)
@@ -24,7 +24,7 @@ func SetupProxyTCP(port string, ring *hashring.HashRing) {
 
 	defer listener.Close()
 
-	fmt.Println("Now accepting connections on port", port)
+	fmt.Println("Now accepting connections on", address)
 
 	for {
 		conn, err := listener.Accept()
