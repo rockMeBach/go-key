@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	conn, err := net.Dial("tcp", ":8000")
+	conn, err := net.Dial("tcp", ":6379")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error connecting to go-key server:", err)
 		return

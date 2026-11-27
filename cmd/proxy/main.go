@@ -36,6 +36,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
+		log.Println("Server " + name + " added at " + address)
 	}
 
 	PORT, set := os.LookupEnv("GOKEY_PROXY_PORT")
