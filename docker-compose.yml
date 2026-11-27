@@ -1,0 +1,25 @@
+# docker-compose.yml
+services:
+  store1:
+    build: .
+    command: ["store"]
+    environment:
+      - GOKEY_STORE_PORT=:8080
+
+  store2:
+    build: .
+    command: ["store"]
+    environment:
+      - GOKEY_STORE_PORT=:8080
+
+  proxy:
+    build: .
+    command: ["proxy"]
+    environment:
+      - GOKEY_PROXY_PORT=:6379
+      - GOKEY_PROXY_STORES=store1-:8080,store2-:8080
+    ports:
+      - "6379:6379"
+    depends_on:
+      - store1
+      - store2
